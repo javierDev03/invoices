@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { InvoiceForm } from "@/app/components/invoice-form"
 import { InvoicePreview } from "@/app/components/invoice-preview"
 import { Card } from "@/components/ui/card"
-import { FileText, Sparkles, Zap } from "lucide-react"
+import { FileText, Sparkles, Zap, Github } from "lucide-react"
 
 export interface InvoiceData {
   // Company info
@@ -52,8 +52,8 @@ export default function InvoiceGenerator() {
     clientAddress: "",
     clientPhone: "",
     clientEmail: "",
-    invoiceNumber: `INV-${Date.now()}`,
-    invoiceDate: new Date().toISOString().split("T")[0],
+    invoiceNumber: "INV-001",
+    invoiceDate: "",
     dueDate: "",
     items: [],
     subtotal: 0,
@@ -61,6 +61,14 @@ export default function InvoiceGenerator() {
     total: 0,
     notes: "",
   })
+
+  useEffect(() => {
+    setInvoiceData((prev) => ({
+      ...prev,
+      invoiceNumber: `INV-${Date.now()}`,
+      invoiceDate: new Date().toISOString().split("T")[0],
+    }))
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -122,17 +130,19 @@ export default function InvoiceGenerator() {
         </div>
 
         <div className="text-center mt-16 pt-8 border-t border-slate-200">
-          <p className="text-slate-500 text-lg">
-            Generador de Facturas Open Source - Creado con <span className="text-red-500">❤️</span> por <a
-              href="https://github.com/javierDev03" // 🔹 Cambia por tu URL real de GitHub
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <a
+              href="https://github.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent hover:opacity-80 transition-opacity duration-300"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors duration-200"
             >
-              JavierDev
+              <Github className="h-5 w-5 text-slate-700" />
+              <span className="text-slate-700 font-medium">Ver en GitHub</span>
             </a>
-            {" "}
-            para{" "}
+          </div>
+          <p className="text-slate-500 text-lg">
+            Generador de Facturas Open Source - Creado con <span className="text-red-500">❤️</span> para{" "}
             <span className="font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               pequeñas empresas y freelancers
             </span>

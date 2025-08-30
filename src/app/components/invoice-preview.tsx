@@ -17,7 +17,6 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
 
     // Modern color palette
     const primaryColor = [59, 130, 246] // Blue-500
-    const secondaryColor = [99, 102, 241] // Indigo-500
     const textColor = [30, 41, 59] // Slate-800
     const mutedColor = [100, 116, 139] // Slate-500
 
@@ -71,12 +70,12 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
     addHeader(1)
 
     // Reset to normal background
-    doc.setTextColor(...textColor)
+    doc.setTextColor(textColor[0], textColor[1], textColor[2])
 
     // Company contact info below header
     let yPos = 55
     doc.setFontSize(9)
-    doc.setTextColor(...mutedColor)
+    doc.setTextColor(mutedColor[0], mutedColor[1], mutedColor[2])
     if (invoiceData.companyPhone) {
       doc.text(`Tel: ${invoiceData.companyPhone}`, 20, yPos)
       yPos += 5
@@ -88,7 +87,7 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
 
     // Due date in top right if exists
     if (invoiceData.dueDate) {
-      doc.setTextColor(...primaryColor)
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
       doc.setFont("helvetica", "bold")
       doc.text(`Vencimiento: ${invoiceData.dueDate}`, 140, 50)
     }
@@ -100,17 +99,18 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
 
     doc.setFont("helvetica", "bold")
     doc.setFontSize(12)
-    doc.setTextColor(...primaryColor)
+    doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
     doc.text("FACTURAR A:", 25, yPos + 5)
 
     doc.setFont("helvetica", "bold")
     doc.setFontSize(14)
-    doc.setTextColor(...textColor)
+    doc.setTextColor(textColor[0], textColor[1], textColor[2])
     doc.text(invoiceData.clientName || "Cliente", 25, yPos + 15)
 
     doc.setFont("helvetica", "normal")
     doc.setFontSize(9)
-    doc.setTextColor(...mutedColor)
+    doc.setTextColor(mutedColor[0], mutedColor[1], mutedColor[2])
+
     let clientYPos = yPos + 22
     if (invoiceData.clientAddress) {
       const clientAddressLines = invoiceData.clientAddress.split("\n")
@@ -123,7 +123,7 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
     }
 
     const addTableHeader = (currentY: number) => {
-      doc.setFillColor(...primaryColor)
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2])
       doc.rect(20, currentY - 8, 170, 12, "F")
 
       doc.setFont("helvetica", "bold")
@@ -143,15 +143,15 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
 
     doc.setFont("helvetica", "normal")
     doc.setFontSize(9)
-    doc.setTextColor(...textColor)
+    doc.setTextColor(textColor[0], textColor[1], textColor[2])
 
     let pageNumber = 1
     const itemHeight = 8
     const maxYPosition = 250 // Maximum Y position before page break
     const headerHeight = 50 // Space needed for header on new page
-    const tableHeaderHeight = 20 // Space needed for table header
+    let itemIndex = 0 // Initialize itemIndex
 
-    invoiceData.items.forEach((item, index) => {
+    invoiceData.items.forEach((item) => {
       if (yPos + itemHeight > maxYPosition) {
         // Add new page
         doc.addPage()
@@ -165,11 +165,11 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
         // Reset text properties
         doc.setFont("helvetica", "normal")
         doc.setFontSize(9)
-        doc.setTextColor(...textColor)
+        doc.setTextColor(textColor[0], textColor[1], textColor[2])
       }
 
       // Add alternating row background
-      if (index % 2 === 0) {
+      if (itemIndex % 2 === 0) {
         doc.setFillColor(248, 250, 252) // Slate-50
         doc.rect(20, yPos - 4, 170, 8, "F")
       }
@@ -180,6 +180,7 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
       doc.text(`$${item.price.toFixed(2)}`, 145, yPos)
       doc.text(`$${item.total.toFixed(2)}`, 170, yPos)
       yPos += itemHeight
+      itemIndex++
     })
 
     const totalsHeight = 45
@@ -192,7 +193,6 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
 
     // Totals section with modern styling
     yPos += 10
-    const totalsStartY = yPos
 
     // Totals background
     doc.setFillColor(248, 250, 252)
@@ -200,7 +200,7 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
 
     doc.setFont("helvetica", "normal")
     doc.setFontSize(10)
-    doc.setTextColor(...mutedColor)
+    doc.setTextColor(mutedColor[0], mutedColor[1], mutedColor[2])
     doc.text("Subtotal:", 125, yPos + 5)
     doc.text(`$${invoiceData.subtotal.toFixed(2)}`, 170, yPos + 5)
 
@@ -210,7 +210,7 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
     // Total with emphasis
     doc.setFont("helvetica", "bold")
     doc.setFontSize(14)
-    doc.setTextColor(...primaryColor)
+    doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
     doc.text("TOTAL:", 125, yPos + 22)
     doc.text(`$${invoiceData.total.toFixed(2)}`, 165, yPos + 22)
 
@@ -227,19 +227,19 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
 
       doc.setFont("helvetica", "bold")
       doc.setFontSize(10)
-      doc.setTextColor(...textColor)
+      doc.setTextColor(textColor[0], textColor[1], textColor[2])
       doc.text("NOTAS:", 20, yPos)
 
       doc.setFont("helvetica", "normal")
       doc.setFontSize(9)
-      doc.setTextColor(...mutedColor)
+      doc.setTextColor(mutedColor[0], mutedColor[1], mutedColor[2])
       const noteLines = doc.splitTextToSize(invoiceData.notes, 170)
       doc.text(noteLines, 20, yPos + 8)
     }
 
     // Footer on last page
     doc.setFontSize(8)
-    doc.setTextColor(...mutedColor)
+    doc.setTextColor(mutedColor[0], mutedColor[1], mutedColor[2])
     doc.text("Generado con Generador de Facturas Open Source", 20, 280)
 
     doc.save(`factura-${invoiceData.invoiceNumber}.pdf`)
@@ -316,11 +316,11 @@ export function InvoicePreview({ invoiceData }: InvoicePreviewProps) {
 
             {invoiceData.items.length > 0 ? (
               <div className="bg-white">
-                {invoiceData.items.map((item, index) => (
+                {invoiceData.items.map((item, itemIndex) => (
                   <div
                     key={item.id}
                     className={`grid grid-cols-12 gap-4 p-4 border-b border-slate-100 ${
-                      index % 2 === 0 ? "bg-white" : "bg-slate-50"
+                      itemIndex % 2 === 0 ? "bg-white" : "bg-slate-50"
                     }`}
                   >
                     <div className="col-span-6 font-medium text-slate-800">{item.description}</div>

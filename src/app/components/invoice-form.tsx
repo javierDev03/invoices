@@ -18,12 +18,15 @@ interface InvoiceFormProps {
 export function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceFormProps) {
   const [taxRate, setTaxRate] = useState(16) // 16% IVA por defecto
 
-  const updateField = (field: keyof InvoiceData, value: any) => {
+  const updateField = (
+    field: keyof InvoiceData,
+    value: string | number | InvoiceData["items"]
+  ) => {
     setInvoiceData({ ...invoiceData, [field]: value })
   }
 
   const addItem = () => {
-    const newItem = {
+    const newItem: InvoiceData["items"][number] = {
       id: Date.now().toString(),
       description: "",
       quantity: 1,
@@ -33,7 +36,11 @@ export function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceFormProps) {
     updateField("items", [...invoiceData.items, newItem])
   }
 
-  const updateItem = (id: string, field: string, value: any) => {
+  const updateItem = (
+    id: string,
+    field: keyof InvoiceData["items"][number],
+    value: string | number
+  ) => {
     const updatedItems = invoiceData.items.map((item) => {
       if (item.id === id) {
         const updatedItem = { ...item, [field]: value }
@@ -60,12 +67,13 @@ export function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceFormProps) {
     const tax = subtotal * (taxRate / 100)
     const total = subtotal + tax
 
-    setInvoiceData((prev) => ({
-      ...prev,
+    setInvoiceData({
+      ...invoiceData,
+      items, // Asegurar que los items se mantengan
       subtotal,
       tax,
       total,
-    }))
+    })
   }
 
   return (
@@ -174,7 +182,6 @@ export function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceFormProps) {
         </CardContent>
       </Card>
 
-      {/* Invoice Details */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -183,22 +190,25 @@ export function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceFormProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="invoiceNumber">Número de Factura</Label>
+              <Label htmlFor="invoiceNumber">Número de Factura *</Label>
               <Input
                 id="invoiceNumber"
                 value={invoiceData.invoiceNumber}
                 onChange={(e) => updateField("invoiceNumber", e.target.value)}
+                placeholder="FAC-001"
+                className="font-mono"
               />
             </div>
             <div>
-              <Label htmlFor="invoiceDate">Fecha de Emisión</Label>
+              <Label htmlFor="invoiceDate">Fecha de Emisión *</Label>
               <Input
                 id="invoiceDate"
                 type="date"
                 value={invoiceData.invoiceDate}
                 onChange={(e) => updateField("invoiceDate", e.target.value)}
+                required
               />
             </div>
             <div>
@@ -230,13 +240,15 @@ export function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceFormProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {invoiceData.items.map((item, index) => (
+            {invoiceData.items.map((item) => (
               <div key={item.id} className="grid grid-cols-12 gap-2 items-end">
                 <div className="col-span-5">
                   <Label>Descripción</Label>
                   <Input
                     value={item.description}
-                    onChange={(e) => updateItem(item.id, "description", e.target.value)}
+                    onChange={(e) =>
+                      updateItem(item.id, "description", e.target.value)
+                    }
                     placeholder="Descripción del producto/servicio"
                   />
                 </div>
@@ -246,7 +258,13 @@ export function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceFormProps) {
                     type="number"
                     min="1"
                     value={item.quantity}
-                    onChange={(e) => updateItem(item.id, "quantity", Number.parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      updateItem(
+                        item.id,
+                        "quantity",
+                        Number.parseInt(e.target.value) || 0
+                      )
+                    }
                   />
                 </div>
                 <div className="col-span-2">
@@ -256,12 +274,22 @@ export function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceFormProps) {
                     min="0"
                     step="0.01"
                     value={item.price}
-                    onChange={(e) => updateItem(item.id, "price", Number.parseFloat(e.target.value) || 0)}
+                    onChange={(e) =>
+                      updateItem(
+                        item.id,
+                        "price",
+                        Number.parseFloat(e.target.value) || 0
+                      )
+                    }
                   />
                 </div>
                 <div className="col-span-2">
                   <Label>Total</Label>
-                  <Input value={`$${item.total.toFixed(2)}`} readOnly className="bg-muted" />
+                  <Input
+                    value={`$${item.total.toFixed(2)}`}
+                    readOnly
+                    className="bg-muted"
+                  />
                 </div>
                 <div className="col-span-1">
                   <Button
@@ -280,7 +308,9 @@ export function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceFormProps) {
               <div className="text-center py-8 text-muted-foreground">
                 <Calculator className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No hay productos/servicios agregados</p>
-                <p className="text-sm">Haz clic en "Agregar Item" para comenzar</p>
+                <p className="text-sm">
+                  Haz clic en &quot;Agregar Item&quot; para comenzar
+                </p>
               </div>
             )}
           </div>
@@ -291,7 +321,9 @@ export function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceFormProps) {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span className="font-medium">${invoiceData.subtotal.toFixed(2)}</span>
+                  <span className="font-medium">
+                    ${invoiceData.subtotal.toFixed(2)}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
@@ -310,12 +342,16 @@ export function InvoiceForm({ invoiceData, setInvoiceData }: InvoiceFormProps) {
                     />
                     <span>%</span>
                   </div>
-                  <span className="font-medium">${invoiceData.tax.toFixed(2)}</span>
+                  <span className="font-medium">
+                    ${invoiceData.tax.toFixed(2)}
+                  </span>
                 </div>
                 <Separator />
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total:</span>
-                  <span className="text-primary">${invoiceData.total.toFixed(2)}</span>
+                  <span className="text-primary">
+                    ${invoiceData.total.toFixed(2)}
+                  </span>
                 </div>
               </div>
             </>
